@@ -4,8 +4,8 @@ country_leader = {
     random = no
     modifier = {
       improve_relations_modifier = 0.2
-      diplomatic_pressure_cost = -0.1
-      foreign_subversive_activities_cost = -0.05
+      diplomatic_pressure_cost_factor = -0.1
+      foreign_subversive_activities_cost_factor = -0.05
     }
   }
 
@@ -34,7 +34,7 @@ country_leader = {
     modifier = {
       stability_factor = 0.05
       political_power_gain = -0.05
-      justify_war_goal_time = 0.1
+      justify_war_goal_time_factor = 0.1
     }
   }
 }
