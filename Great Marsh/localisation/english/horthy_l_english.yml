@@ -1,0 +1,11 @@
+l_english:
+  horthy_polyglot: "Polyglot"
+  horthy_polyglot_desc: "Improve Relations Opinion: +20%\nDiplomatic Pressure Cost: -10%\nForeign Subversive Activities Cost: -5%"
+  horthy_conservative_regent: "Conservative Regent"
+  horthy_conservative_regent_desc: "Stability: +10%\nWar Support: -5%\nIdeology Drift Defense: +15%"
+  horthy_admiral_without_fleet: "Admiral Without a Fleet"
+  horthy_admiral_without_fleet_desc: "Naval Doctrine Research Speed: +5%\nArmy Experience Gain: -5%"
+  horthy_regent_without_king: "Regent Without a King"
+  horthy_regent_without_king_desc: "Stability: +5%\nPolitical Power Gain: -5%\nJustification time: +10%"
+
+  HUN_Miklos_Horthy_desc: "Miklos Horthy is the regent of the Kingdom of Hungary and a former admiral of the Austro-Hungarian fleet. After the empire collapsed and a period of political chaos, he came to power in 1920, restoring order and ensuring relative stability. Despite the absence of a king, Hungary under Horthy retains a monarchical form of government.\n\nBy 1936, Horthy remains a symbol of a conservative state course, relying on the army, aristocracy, and traditional elites. His main goal is to revise the postwar treaties and restore Hungary's lost international influence, while he seeks to avoid open conflicts and sharp ideological experiments."
