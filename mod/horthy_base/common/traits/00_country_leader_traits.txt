@@ -1,0 +1,40 @@
+country_leader = {
+  horthy_polyglot = {
+    allowed = { always = yes }
+    random = no
+    modifier = {
+      improve_relations_modifier = 0.2
+      diplomatic_pressure_cost = -0.1
+      foreign_subversive_activities_cost = -0.05
+    }
+  }
+
+  horthy_conservative_regent = {
+    allowed = { always = yes }
+    random = no
+    modifier = {
+      stability_factor = 0.1
+      war_support_factor = -0.05
+      ideology_drift_defence = 0.15
+    }
+  }
+
+  horthy_admiral_without_fleet = {
+    allowed = { always = yes }
+    random = no
+    modifier = {
+      naval_doctrine_research_speed_factor = 0.05
+      army_experience_gain = -0.05
+    }
+  }
+
+  horthy_regent_without_king = {
+    allowed = { always = yes }
+    random = no
+    modifier = {
+      stability_factor = 0.05
+      political_power_gain = -0.05
+      justify_war_goal_time = 0.1
+    }
+  }
+}
