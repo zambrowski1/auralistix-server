@@ -1,5 +1,7 @@
 country_leader = {
   horthy_polyglot = {
+    icon = GFX_trait_generic_political
+    visible = yes
     allowed = { always = yes }
     random = no
     modifier = {
@@ -10,6 +12,8 @@ country_leader = {
   }
 
   horthy_conservative_regent = {
+    icon = GFX_trait_generic_political
+    visible = yes
     allowed = { always = yes }
     random = no
     modifier = {
@@ -20,6 +24,8 @@ country_leader = {
   }
 
   horthy_admiral_without_fleet = {
+    icon = GFX_trait_generic_admiral
+    visible = yes
     allowed = { always = yes }
     random = no
     modifier = {
@@ -29,6 +35,8 @@ country_leader = {
   }
 
   horthy_regent_without_king = {
+    icon = GFX_trait_generic_political
+    visible = yes
     allowed = { always = yes }
     random = no
     modifier = {
