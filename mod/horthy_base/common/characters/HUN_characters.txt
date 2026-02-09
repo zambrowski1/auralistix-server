@@ -1,9 +1,13 @@
 characters = {
   HUN_Miklos_Horthy = {
     name = HUN_Miklos_Horthy
-    desc = HUN_Miklos_Horthy_desc
-    portrait_path = "gfx/leaders/HUN/HUN_Miklos_Horthy.dds"
+    portraits = {
+      civilian = {
+        large = "gfx/leaders/HUN/HUN_Miklos_Horthy.dds"
+      }
+    }
     country_leader = {
+      desc = HUN_Miklos_Horthy_desc
       ideology = despotism
       expire = "1965.1.1"
       traits = {
