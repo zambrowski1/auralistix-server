@@ -1,0 +1,21 @@
+characters = {
+  HUN_Miklos_Horthy = {
+    name = HUN_Miklos_Horthy
+    portraits = {
+      civilian = {
+        large = "gfx/leaders/HUN/HUN_Miklos_Horthy.dds"
+      }
+    }
+    country_leader = {
+      desc = HUN_Miklos_Horthy_desc
+      ideology = despotism
+      expire = "1965.1.1"
+      traits = {
+        horthy_polyglot
+        horthy_conservative_regent
+        horthy_admiral_without_fleet
+        horthy_regent_without_king
+      }
+    }
+  }
+}
