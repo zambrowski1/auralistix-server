@@ -5,8 +5,12 @@
   horthy_regent_without_king: "Regent Without a King"
 
   HUN_Miklos_Horthy: "Miklos Horthy"
+  HUN_pal_pronay: "Pál Prónay"
   HUN_Miklos_Horthy_desc: "Miklos Horthy is the regent of the Kingdom of Hungary and a former admiral of the Austro-Hungarian fleet. After the empire collapsed and a period of political chaos, he came to power in 1920, restoring order and ensuring relative stability. Despite the absence of a king, Hungary under Horthy retains a monarchical form of government.\n\nBy 1936, Horthy remains a symbol of a conservative state course, relying on the army, aristocracy, and traditional elites. His main goal is to revise the postwar treaties and restore Hungary's lost international influence, while he seeks to avoid open conflicts and sharp ideological experiments."
   HUN_pal_pronay_desc: "A veteran officer and a radical nationalist, Pál Prónay rose to prominence through his paramilitary networks and uncompromising methods. By 1936, his name evokes both fear and devotion—an omen of a harsher order."
+
+  HUN_fascism_party: "Rongyos Gárda"
+  HUN_fascism_party_long: "Rongyos Gárda"
 
   HUN_pronay_regime: "Prónay Regime"
   HUN_pronay_regime_desc: "A hardline rule built on loyal networks, intimidation, and an obsession with order."

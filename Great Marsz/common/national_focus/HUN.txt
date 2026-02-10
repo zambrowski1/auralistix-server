@@ -148,6 +148,11 @@ focus_tree = {
 			add_stability = -0.06
 			add_war_support = 0.06
 			set_politics = { ruling_party = fascism elections_allowed = no }
+			set_party_name = {
+				ideology = fascism
+				name = HUN_fascism_party
+				long_name = HUN_fascism_party_long
+			}
 			set_country_flag = HUN_pronay_rules
 			add_ideas = HUN_pronay_regime
 
