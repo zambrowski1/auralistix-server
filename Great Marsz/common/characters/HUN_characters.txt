@@ -23,7 +23,7 @@ characters = {
 	}
 	
 	HUN_pal_pronay = {
-		name = "Pal Pronay"
+		name = HUN_pal_pronay
 		portraits = {
 			civilian = {
 				large = "gfx/leaders/HUN/HUN_Pal_Pronay.dds"
