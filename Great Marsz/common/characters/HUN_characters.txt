@@ -1,0 +1,60 @@
+characters = {
+	HUN_Miklos_Horthy_GM = {
+		name = HUN_Miklos_Horthy
+
+		portraits = {
+			civilian = {
+				large = "gfx/leaders/HUN/HUN_Miklos_Horthy.dds"
+			}
+		}
+
+		country_leader = {
+			desc = HUN_Miklos_Horthy_desc
+			ideology = despotism
+			expire = "1965.1.1"
+
+			traits = {
+				horthy_polyglot
+				horthy_conservative_regent
+				horthy_admiral_without_fleet
+				horthy_regent_without_king
+			}
+		}
+	}
+	
+	HUN_Pal_Pronay_GM = {
+		name = HUN_Pal_Pronay
+		portraits = {
+			civilian = {
+				large = "gfx/leaders/HUN/HUN_Pal_Pronay.dds"
+			}
+			army = {
+				large = "gfx/leaders/HUN/HUN_Pal_Pronay_army.dds"
+			}
+		}
+		country_leader = {
+			desc = HUN_Pal_Pronay_desc
+			ideology = fascism_ideology
+			expire = "1965.1.1"
+			traits = {
+				HUN_executioner_of_the_regime
+				HUN_political_outsider
+				HUN_white_terrorist
+			}
+		}
+		field_marshal = {
+			traits = {
+				old_guard
+				harsh_leader
+				infantry_officer
+				rongyos_garda_commander_GM
+			}
+			skill = 3
+			attack_skill = 3
+			defense_skill = 2
+			planning_skill = 1
+			logistics_skill = 1
+    }
+
+	}
+}

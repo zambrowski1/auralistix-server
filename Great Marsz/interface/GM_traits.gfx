@@ -1,0 +1,6 @@
+spriteTypes = {
+    spriteType = {
+        name = "GFX_trait_rongyos_garda_commander_GM"
+        texturefile = "gfx/interface/traits/rongyos_garda_commander_GM.dds"
+    }
+}

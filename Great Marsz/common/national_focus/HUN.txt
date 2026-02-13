@@ -1,0 +1,294 @@
+focus_tree = {
+	id = HUN_pronai_tree
+	country = {
+		factor = 0
+		modifier = {
+			add = 100
+			tag = HUN
+		}
+	}
+	default = no
+
+	focus = {
+		id = HUN_radicalisation_front
+		icon = GFX_goal_generic_political_pressure
+		cost = 10
+		x = 17
+		y = -1
+		completion_reward = {
+			add_stability = -0.05
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.05
+			}
+			add_political_power = 50
+		}
+	}
+
+	focus = {
+		id = HUN_disappointment_regency
+		icon = GFX_goal_generic_propaganda
+		cost = 10
+		prerequisite = {
+			focus = HUN_radicalisation_front
+		}
+		x = 17
+		y = 1
+		completion_reward = {
+			set_power_balance = {
+				id = GM_HUN_right_struggle_bop
+			}
+			
+			add_stability = -0.10
+			set_country_flag = GM_HUN_right_struggle_unlocked
+			custom_effect_tooltip = GM_HUN_right_struggle_tooltip
+			
+			# Переменные можно оставить для тултипов, но логика теперь на балансе сил
+			set_variable = { GM_pronai_support = 30 }
+			set_variable = { GM_szlasi_support = 70 }
+			set_variable = { GM_population_radicalization = 20 }
+			
+			add_stability = -0.05
+		}
+	}
+
+	focus = {
+		id = HUN_trianon_unfinished
+		icon = GFX_goal_generic_demand_territory
+		cost = 10
+		prerequisite = {
+			focus = HUN_disappointment_regency
+		}
+		x = 16
+		y = 2
+		completion_reward = {
+			add_war_support = 0.05
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.05
+			}
+			add_stability = -0.05
+			add_to_variable = {
+				var = GM_population_radicalization
+				value = 8
+			}
+		}
+	}
+
+	focus = {
+		id = HUN_volksbund_question
+		icon = GFX_goal_generic_political_pressure
+		cost = 10
+		prerequisite = {
+			focus = HUN_disappointment_regency
+		}
+		x = 18
+		y = 2
+		completion_reward = {
+			country_event = {
+				id = HUN_event.1
+			}
+		}
+	}
+
+	focus = {
+		id = HUN_forgotten_veterans
+		icon = GFX_goal_generic_army_experience
+		cost = 10
+		prerequisite = {
+			focus = HUN_volksbund_question
+		}
+		prerequisite = {
+			focus = HUN_trianon_unfinished
+		}
+		x = 17
+		y = 3
+		completion_reward = {
+			# ИСПРАВЛЕНО: army_experience вместо add_army_experience
+			army_experience = 10
+			country_event = {
+				id = HUN_event.2
+			}
+		}
+	}
+
+	focus = {
+		id = HUN_two_poles
+		icon = GFX_goal_generic_political_reform
+		cost = 10
+		prerequisite = {
+			focus = HUN_forgotten_veterans
+		}
+		x = 17
+		y = 4
+		completion_reward = {
+			add_stability = -0.30
+			add_war_support = 0.15
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.10
+			}
+		}
+	}
+
+	focus = {
+		id = HUN_crossed_arrows
+		icon = GFX_goal_generic_army_doctrines
+		cost = 10
+		prerequisite = {
+			focus = HUN_two_poles
+		}
+		mutually_exclusive = {
+			focus = HUN_rongyos_garda
+		}
+		x = 15
+		y = 5
+		completion_reward = {
+			add_war_support = 0.10
+			# ИСПРАВЛЕНО
+			army_experience = 50
+		}
+	}
+
+	focus = {
+		id = HUN_rongyos_garda
+		icon = GFX_goal_generic_militia
+		cost = 10
+		prerequisite = {
+			focus = HUN_two_poles
+		}
+		mutually_exclusive = {
+			focus = HUN_crossed_arrows
+		}
+		x = 19
+		y = 5
+		completion_reward = {
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.05
+			}
+			set_party_name = {
+				ideology = fascism
+				long_name = "Rongyos Gárda"
+				name = "Rongyos Gárda"
+			}
+		}
+	}
+
+	focus = {
+		id = HUN_revival_oborvantsy
+		icon = GFX_goal_generic_army_doctrines
+		cost = 10
+		prerequisite = {
+			focus = HUN_rongyos_garda
+		}
+		x = 19
+		y = 6
+		completion_reward = {
+			add_war_support = 0.10
+			# ИСПРАВЛЕНО
+			army_experience = 50
+		}
+	}
+
+	focus = {
+		id = HUN_garrison_contacts
+		icon = GFX_goal_generic_allies_build_infantry
+		cost = 10
+		prerequisite = {
+			focus = HUN_revival_oborvantsy
+		}
+		x = 18
+		y = 7
+		completion_reward = {
+			add_war_support = 0.05
+			# ИСПРАВЛЕНО
+			army_experience = 25
+			add_stability = -0.05
+		}
+	}
+
+	focus = {
+		id = HUN_black_lists
+		icon = GFX_goal_generic_purge
+		cost = 10
+		prerequisite = {
+			focus = HUN_garrison_contacts
+		}
+		x = 18
+		y = 8
+		completion_reward = {
+			add_stability = -0.10
+			add_war_support = 0.10
+		}
+	}
+
+	focus = {
+		id = HUN_officer_circles
+		icon = GFX_goal_generic_staff
+		cost = 10
+		prerequisite = {
+			focus = HUN_revival_oborvantsy
+		}
+		x = 20
+		y = 7
+		completion_reward = {
+			# ИСПРАВЛЕНО
+			army_experience = 35
+			add_war_support = 0.05
+		}
+	}
+
+	focus = {
+		id = HUN_burgenland_experience
+		icon = GFX_goal_generic_border_conflict
+		cost = 10
+		prerequisite = {
+			focus = HUN_officer_circles
+		}
+		x = 20
+		y = 8
+		completion_reward = {
+			army_experience = 50
+			add_war_support = 0.05
+		}
+	}
+
+	focus = {
+		id = HUN_plan_saint_stephen
+		icon = GFX_goal_generic_secret_police
+		cost = 10
+		prerequisite = {
+			focus = HUN_burgenland_experience
+		}
+		prerequisite = {
+			focus = HUN_black_lists
+		}
+		x = 19
+		y = 9
+		completion_reward = {
+			add_stability = -0.10
+			add_war_support = 0.10
+		}
+	}
+
+	focus = {
+		id = HUN_night_of_long_knives
+		icon = GFX_goal_generic_purge
+		cost = 10
+		prerequisite = {
+			focus = HUN_plan_saint_stephen
+		}
+		x = 19
+		y = 10
+		completion_reward = {
+			add_stability = -0.15
+			add_war_support = 0.15
+			add_political_power = 100
+			add_popularity = {
+				ideology = fascism
+				popularity = 0.10
+			}
+		}
+	}
+}

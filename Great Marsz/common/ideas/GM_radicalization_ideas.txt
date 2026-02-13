@@ -1,0 +1,43 @@
+ideas = {
+	country = {
+		# Уровень 1
+		GM_radicalization_low = {
+			picture = GM_radicalization_low # Ссылается на GFX_idea_GM_radicalization_low
+			allowed = { always = yes }
+			modifier = { stability_factor = 0.05 }
+		}
+
+		# Уровень 2
+		GM_radicalization_medium = {
+			picture = GM_radicalization_medium
+			allowed = { always = yes }
+			modifier = {
+				stability_factor = -0.05
+				political_power_gain = 0.05
+			}
+		}
+
+		# Уровень 3
+		GM_radicalization_high = {
+			picture = GM_radicalization_high
+			allowed = { always = yes }
+			modifier = {
+				stability_factor = -0.15
+				political_power_gain = 0.10
+				war_support_factor = 0.05
+			}
+		}
+
+		# Уровень 4
+		GM_radicalization_extreme = {
+			picture = GM_radicalization_extreme
+			allowed = { always = yes }
+			modifier = {
+				stability_factor = -0.30
+				political_power_gain = 0.20
+				war_support_factor = 0.20
+				recruitable_population_factor = 0.05
+			}
+		}
+	}
+}

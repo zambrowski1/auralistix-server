@@ -1,0 +1,12 @@
+on_actions = {
+	# Проверка каждую неделю
+	on_weekly = {
+		effect = {
+			# Проверяем только для Венгрии, чтобы не грузить игру
+			if = {
+				limit = { tag = HUN }
+				GM_update_radicalization_level = yes
+			}
+		}
+	}
+}

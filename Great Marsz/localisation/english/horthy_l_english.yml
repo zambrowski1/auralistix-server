@@ -1,0 +1,73 @@
+﻿l_english:
+  horthy_polyglot: "Polyglot"
+  horthy_conservative_regent: "Conservative Regent"
+  horthy_admiral_without_fleet: "Admiral Without a Fleet"
+  horthy_regent_without_king: "Regent Without a King"
+
+  HUN_Miklos_Horthy: "Miklos Horthy"
+  HUN_Pal_Pronay: "Pál Prónay"
+  HUN_Miklos_Horthy_desc: "Miklos Horthy is the regent of the Kingdom of Hungary and a former admiral of the Austro-Hungarian fleet. After the empire collapsed and a period of political chaos, he came to power in 1920, restoring order and ensuring relative stability. Despite the absence of a king, Hungary under Horthy retains a monarchical form of government.\n\nBy 1936, Horthy remains a symbol of a conservative state course, relying on the army, aristocracy, and traditional elites. His main goal is to revise the postwar treaties and restore Hungary's lost international influence, while he seeks to avoid open conflicts and sharp ideological experiments."
+  HUN_Pal_Pronay_desc: "Pál Prónay is a figure who inspires dread even among his allies. A former officer of the Austro-Hungarian Army, he gained bloody notoriety in 1919 as the leader of a paramilitary detachment that ruthlessly suppressed the remnants of the Hungarian Soviet Republic. His role in the 'White Terror' and the creation of the 'Rongyos Gárda' to fight for Burgenland made him a national hero to radicals, but a dangerous fanatic to the moderate circles led by Horthy."
+
+  HUN_fascism_party: "Rongyos Gárda"
+  HUN_fascism_party_long: "Rongyos Gárda"
+
+  HUN_pronay_regime: "Prónay Regime"
+  HUN_pronay_regime_desc: "A hardline rule built on loyal networks, intimidation, and an obsession with order."
+
+  HUN_pronay_purges: "Political Purges"
+  HUN_pronay_purges_desc: "Opposition structures are dismantled through arrests, intimidation, and systematic repression."
+
+  HUN_pronay_gendarmerie: "Expanded Gendarmerie"
+  HUN_pronay_gendarmerie_desc: "Security forces are reinforced to keep the country in line."
+
+  HUN_pronay_decisions: "Prónay's Consolidation"
+  HUN_pronay_consolidate_power: "Consolidate Power"
+  HUN_pronay_consolidate_power_desc: "Secure the key institutions and bind the state apparatus to the new order."
+
+  HUN_pronay_purge_opposition: "Purge the Opposition"
+  HUN_pronay_purge_opposition_desc: "Eliminate democratic and communist structures before they can organize."
+
+  HUN_pronay_expand_gendarmerie: "Expand the Gendarmerie"
+  HUN_pronay_expand_gendarmerie_desc: "Increase internal security capacity and tighten control over the provinces."
+
+  HUN_pronay_mobilize_garda: "Mobilize the Garda"
+  HUN_pronay_mobilize_garda_desc: "Call on loyal paramilitary formations to bolster manpower and readiness."
+
+  HUN_pronay_border_raids: "Encourage Border Raids"
+  HUN_pronay_border_raids_desc: "Turn up the pressure abroad through deniable actions and provocations."
+
+ HUN_political_actions_begin: "Begin Political Actions"
+ HUN_political_actions_begin_desc: "Hungary’s political system appears stable on the surface, yet deep contradictions are growing beneath it. The time has come to move from passive observation to active political action."
+
+ HUN_regency_question: "The Regency Question"
+ HUN_regency_question_desc: "The role of the Regent remains central to the future of the state. It is time to reopen the question of power and the acceptable limits of regency rule."
+
+ HUN_call_for_order: "Call for Order"
+ HUN_call_for_order_desc: "Society demands a firm hand. Under the banner of restoring order, tighter control and the suppression of political opponents can be justified."
+
+ HUN_rongyos_garda: "Rongyos Gárda"
+ HUN_rongyos_garda_desc: "Paramilitary nationalist groups can serve as a useful tool of intimidation and pressure. Their use will radicalize politics, but strengthen the resolve of supporters."
+
+ HUN_white_terror_legacy: "Legacy of the White Terror"
+ HUN_white_terror_legacy_desc:0"Memories of the White Terror remain vivid. Reviving its methods may silence the opposition, but at the cost of growing instability."
+
+ HUN_pronay_network: "The Prónay Network"
+ HUN_pronay_network_desc: "Pál Prónay maintains extensive connections among radicals, officers, and secret societies. Establishing his informal network will lay the groundwork for a seizure of power."
+
+ HUN_pronay_as_pm: "Prónay as Prime Minister"
+ HUN_pronay_as_pm_desc: "Prónay’s formal entry into government marks a decisive step toward dismantling the old order and radically altering Hungary’s political course."
+
+ HUN_pronay_takes_power: "Prónay Takes Power"
+ HUN_pronay_takes_power_desc: "The political crisis has reached its peak. With no internal or external obstacles remaining, Prónay can eliminate his rivals and establish an authoritarian regime."
+ 
+ HUN_executioner_of_the_regime: "Executioner of the Regime"
+
+ HUN_political_outsider: "Political Outsider"
+
+ HUN_white_terrorist: "White Terrorist"
+ 
+ HUN_pronay_takes_power_custom_tt: "§HPál Prónay§! will become the leader of the §HFascist§! party and will start serving as a §HField Marshal§!, as the §HRongyos Gárda§! takes control of the country."
+ 
+rongyos_garda_commander_GM: "Commander of the Rongyos Gárda"
+rongyos_garda_commander_GM_desc: "§gThis officer has passed through the crucible of terror and small-scale clashes. He knows how to extract the maximum from paramilitary formations, but lacks proper staff experience.§!"

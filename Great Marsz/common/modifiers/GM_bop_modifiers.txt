@@ -1,0 +1,22 @@
+# Равновесие (пока никто не побеждает)
+GM_balance_modifier = {
+	political_power_gain = -0.10 # Бардак во власти, теряем политку
+}
+
+# Салаши усиливается
+GM_szlasi_high_modifier = {
+	recruitable_population_factor = 0.02
+}
+GM_szlasi_total_modifier = {
+	recruitable_population_factor = 0.05
+	war_support_factor = 0.10
+}
+
+# Пронаи усиливается
+GM_pronai_high_modifier = {
+	army_core_attack_factor = 0.05
+}
+GM_pronai_total_modifier = {
+	army_core_attack_factor = 0.10
+	stability_factor = 0.10
+}

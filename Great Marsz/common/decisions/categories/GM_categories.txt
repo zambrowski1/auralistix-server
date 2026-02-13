@@ -1,0 +1,16 @@
+GM_HUN_right_struggle = {
+    icon = generic_political_pressure
+	priority = 100
+    # Кто вообще может видеть эту категорию (обычно тег страны)
+    allowed = {
+        tag = HUN
+    }
+
+    # Когда категория видна (у тебя тут проверка флага)
+    visible = {
+        has_country_flag = GM_HUN_right_struggle_unlocked
+    }
+
+    # Если хочешь, чтобы категория была видна, даже когда в ней нет активных решений
+    visible_when_empty = yes 
+}

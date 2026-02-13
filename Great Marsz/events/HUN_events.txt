@@ -1,0 +1,74 @@
+add_namespace = HUN_event
+
+# Ивент про Фольксбунд
+country_event = {
+	id = HUN_event.1
+	title = HUN_event.1.t
+	desc = HUN_event.1.d
+	picture = GFX_report_event_german_speech
+
+	is_triggered_only = yes
+
+	# Вариант 1: Договор (Салаши +, Пронаи -)
+	option = {
+		name = HUN_event.1.a
+		ai_chance = { factor = 50 }
+
+		add_power_balance_value = {
+		id = GM_HUN_right_struggle_bop
+		value = -0.10
+		}	
+
+		add_opinion_modifier = {
+			target = GER
+			modifier = GM_improved_relations
+		}
+		add_ideas = HUN_volksbund_concessions
+	}
+
+	# Вариант 2: Покончить с ними (Пронаи +, Салаши -)
+	option = {
+		name = HUN_event.1.b
+		ai_chance = { factor = 50 }
+
+		add_power_balance_value = {
+		id = GM_HUN_right_struggle_bop
+		value = 0.15
+		}
+		
+		add_opinion_modifier = {
+			target = GER
+			modifier = GM_bad_relations
+		}
+
+		add_ideas = HUN_purged_volksbund
+	}
+}
+
+# Ивент про Ветеранов
+country_event = {
+	id = HUN_event.2
+	title = HUN_event.2.t
+	desc = HUN_event.2.d
+	picture = GFX_report_event_soldiers_marching
+
+	is_triggered_only = yes
+
+	option = {
+		name = HUN_event.2.a
+		add_power_balance_value = {
+		id = GM_HUN_right_struggle_bop
+		value = -0.05
+		}
+		add_ideas = HUN_veterans_in_party
+	}
+
+	option = {
+		name = HUN_event.2.b
+		add_power_balance_value = {
+		id = GM_HUN_right_struggle_bop
+		value = 0.05
+		}
+		add_ideas = HUN_veterans_in_ranks
+	}
+}

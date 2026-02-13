@@ -1,0 +1,18 @@
+capital = 70
+
+set_politics = {
+  ruling_party = neutrality
+  last_election = "1935.1.1"
+  election_frequency = 48
+  elections_allowed = no
+}
+
+set_popularities = {
+  neutrality = 60
+  democratic = 20
+  fascism = 10
+  communism = 10
+}
+
+#recruit_character = HUN_Pal_Pronay_GM
+recruit_character = HUN_Miklos_Horthy_GM

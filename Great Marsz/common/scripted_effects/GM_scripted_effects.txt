@@ -1,0 +1,53 @@
+GM_update_radicalization_level = {
+	# Уровень 1: Низкая (0 - 24)
+	if = {
+		limit = {
+			# Объединили условия в один блок limit
+			GM_population_radicalization > -1  # Больше или равно 0
+			GM_population_radicalization < 25  # Меньше 25
+		}
+		
+		add_ideas = GM_radicalization_low
+		remove_ideas = GM_radicalization_medium
+		remove_ideas = GM_radicalization_high
+		remove_ideas = GM_radicalization_extreme
+	}
+
+	# Уровень 2: Средняя (25 - 49)
+	if = {
+		limit = {
+			GM_population_radicalization > 24 # 25 и больше
+			GM_population_radicalization < 50
+		}
+		
+		remove_ideas = GM_radicalization_low
+		add_ideas = GM_radicalization_medium
+		remove_ideas = GM_radicalization_high
+		remove_ideas = GM_radicalization_extreme
+	}
+
+	# Уровень 3: Высокая (50 - 74)
+	if = {
+		limit = {
+			GM_population_radicalization > 49
+			GM_population_radicalization < 75
+		}
+		
+		remove_ideas = GM_radicalization_low
+		remove_ideas = GM_radicalization_medium
+		add_ideas = GM_radicalization_high
+		remove_ideas = GM_radicalization_extreme
+	}
+
+	# Уровень 4: Критическая (75+)
+	if = {
+		limit = {
+			GM_population_radicalization > 74
+		}
+		
+		remove_ideas = GM_radicalization_low
+		remove_ideas = GM_radicalization_medium
+		remove_ideas = GM_radicalization_high
+		add_ideas = GM_radicalization_extreme
+	}
+}
