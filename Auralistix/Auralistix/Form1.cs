@@ -17,6 +17,7 @@ using NHotkey.WindowsForms;
 using NAudio.CoreAudioApi;
 using System.Text.Json;
 using System.Runtime.InteropServices;
+using System.Globalization;
 
 namespace Auralistix
 {
@@ -77,6 +78,10 @@ namespace Auralistix
 
         private SoundItem? _bindingItem = null;
 
+        private SortColumn _sortColumn = SortColumn.None;
+        private SortDirection _sortDirection = SortDirection.Asc;
+        private readonly CompareInfo _sortCompareInfo = new CultureInfo("ru-RU").CompareInfo;
+
         // --- ГЛОБАЛЬНЫЕ ХОТКЕИ (API WINDOWS) ---
         [DllImport("user32.dll")]
         private static extern short GetAsyncKeyState(Keys vKey);
@@ -99,6 +104,9 @@ namespace Auralistix
         private sealed class EqPreset { public string Name { get; set; } = "Preset"; public int Low { get; set; } public int Mid { get; set; } public int High { get; set; } }
         private sealed class WaveOutDeviceItem { public int DeviceNumber { get; } public string Name { get; } public WaveOutDeviceItem(int d, string n) { DeviceNumber = d; Name = n; } public override string ToString() => Name; }
         private sealed class WaveInDeviceItem { public int DeviceNumber { get; } public string Name { get; } public WaveInDeviceItem(int d, string n) { DeviceNumber = d; Name = n; } public override string ToString() => Name; }
+
+        private enum SortColumn { None, Number, Name, Duration, Bind }
+        private enum SortDirection { Asc, Desc }
 
         public Form1()
         {
@@ -228,25 +236,102 @@ namespace Auralistix
             listView1.Columns.Add("Имя файла", 200);
             listView1.Columns.Add("Длительность", 90);
             listView1.Columns.Add("Бинд", 120);
+            listView1.ColumnClick += ListView1_ColumnClick;
 
-            listView1.DragEnter += (s, e) => { if (e.Data!.GetDataPresent(typeof(List<ListViewItem>)) || e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy; };
-            listView1.DragDrop += (s, e) =>
-            {
-                if (e.Data!.GetDataPresent(DataFormats.FileDrop) && e.Data.GetData(DataFormats.FileDrop) is string[] paths)
-                {
-                    foreach (var path in paths)
-                    {
-                        if (Directory.Exists(path)) { foreach (var f in Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)) AddFileToPlaylist(f); }
-                        else if (File.Exists(path)) AddFileToPlaylist(path);
-                    }
-                    RefreshListView(); AutoSaveProfile();
-                }
-            };
+            listView1.DragEnter += ListView1_DragEnter;
+            listView1.DragDrop += ListView1_DragDrop;
 
             listView1.ItemDrag += (s, e) => {
                 var draggedItems = listView1.SelectedItems.Cast<ListViewItem>().ToList();
                 listView1.DoDragDrop(draggedItems, DragDropEffects.Move);
             };
+        }
+
+        private void ListView1_ColumnClick(object? sender, ColumnClickEventArgs e)
+        {
+            var clicked = e.Column switch
+            {
+                0 => SortColumn.Number,
+                1 => SortColumn.Name,
+                2 => SortColumn.Duration,
+                3 => SortColumn.Bind,
+                _ => SortColumn.None
+            };
+
+            if (clicked == SortColumn.None) return;
+
+            if (_sortColumn == clicked)
+                _sortDirection = _sortDirection == SortDirection.Asc ? SortDirection.Desc : SortDirection.Asc;
+            else
+            {
+                _sortColumn = clicked;
+                _sortDirection = SortDirection.Asc;
+            }
+
+            RefreshListView();
+        }
+
+        private void ListView1_DragEnter(object? sender, DragEventArgs e)
+        {
+            if (e.Data == null) return;
+
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+                return;
+            }
+
+            if (e.Data.GetDataPresent(typeof(List<ListViewItem>)))
+                e.Effect = (GetSelectedBank() != null && string.IsNullOrWhiteSpace(txtSearch.Text)) ? DragDropEffects.Move : DragDropEffects.None;
+        }
+
+        private void ListView1_DragDrop(object? sender, DragEventArgs e)
+        {
+            if (e.Data == null) return;
+
+            if (e.Data.GetDataPresent(DataFormats.FileDrop) && e.Data.GetData(DataFormats.FileDrop) is string[] paths)
+            {
+                foreach (var path in paths)
+                {
+                    if (Directory.Exists(path)) { foreach (var f in Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)) AddFileToPlaylist(f); }
+                    else if (File.Exists(path)) AddFileToPlaylist(path);
+                }
+                RefreshListView();
+                AutoSaveProfile();
+                return;
+            }
+
+            if (!e.Data.GetDataPresent(typeof(List<ListViewItem>)) || e.Data.GetData(typeof(List<ListViewItem>)) is not List<ListViewItem> draggedItems)
+                return;
+
+            var bank = GetSelectedBank();
+            if (bank == null || !string.IsNullOrWhiteSpace(txtSearch.Text)) return;
+
+            var clientPoint = listView1.PointToClient(new Point(e.X, e.Y));
+            var targetItem = listView1.GetItemAt(clientPoint.X, clientPoint.Y);
+            int insertAt = targetItem?.Tag is SoundItem targetSound ? bank.Sounds.IndexOf(targetSound) : bank.Sounds.Count;
+            if (insertAt < 0) insertAt = bank.Sounds.Count;
+
+            var sounds = draggedItems.Select(i => i.Tag as SoundItem).Where(i => i != null).Cast<SoundItem>().ToList();
+            if (sounds.Count == 0) return;
+
+            var firstDraggedIndex = bank.Sounds.IndexOf(sounds[0]);
+            bool movingDown = firstDraggedIndex >= 0 && firstDraggedIndex < insertAt;
+
+            foreach (var sound in sounds)
+                bank.Sounds.Remove(sound);
+
+            if (movingDown)
+                insertAt = Math.Max(0, insertAt - sounds.Count);
+
+            insertAt = Math.Clamp(insertAt, 0, bank.Sounds.Count);
+            bank.Sounds.InsertRange(insertAt, sounds);
+
+            _sortColumn = SortColumn.None;
+            _sortDirection = SortDirection.Asc;
+
+            RefreshListView();
+            AutoSaveProfile();
         }
 
         private bool IsMicRoutingNeeded() => (s_cbPassthrough?.Checked ?? false) || (s_cbMicListen?.Checked ?? false);
@@ -679,7 +764,7 @@ namespace Auralistix
                 soundsToDisplay = bank != null ? bank.Sounds : Enumerable.Empty<SoundItem>();
             }
 
-            soundsToDisplay = soundsToDisplay.OrderBy(s => s.Category == "Red" ? 0 : s.Category == "Yellow" ? 1 : s.Category == "Blue" ? 2 : 3).ThenBy(s => s.Name);
+            soundsToDisplay = SortSoundsForDisplay(soundsToDisplay);
 
             listView1.BeginUpdate();
             listView1.Items.Clear();
@@ -704,6 +789,93 @@ namespace Auralistix
                 index++;
             }
             listView1.EndUpdate();
+        }
+
+        private IEnumerable<SoundItem> SortSoundsForDisplay(IEnumerable<SoundItem> sounds)
+        {
+            IOrderedEnumerable<SoundItem> ordered;
+
+            if (_sortColumn == SortColumn.None)
+            {
+                ordered = sounds.OrderBy(CategoryRank)
+                               .ThenBy(s => s.Name, Comparer<string>.Create(CompareText));
+            }
+            else
+            {
+                Func<SoundItem, object> keySelector = _sortColumn switch
+                {
+                    SortColumn.Number => s => GetSelectedBank()?.Sounds.IndexOf(s) ?? int.MaxValue,
+                    SortColumn.Name => s => s.Name,
+                    SortColumn.Duration => s => ParseDurationSeconds(s.Duration),
+                    SortColumn.Bind => s => s.BindKey,
+                    _ => s => s.Name
+                };
+
+                ordered = _sortDirection == SortDirection.Asc
+                    ? sounds.OrderBy(CategoryRank).ThenBy(keySelector, new SortKeyComparer(this, _sortColumn))
+                    : sounds.OrderBy(CategoryRank).ThenByDescending(keySelector, new SortKeyComparer(this, _sortColumn));
+            }
+
+            return ordered;
+        }
+
+        private int CategoryRank(SoundItem s) => s.Category == "Red" ? 0 : s.Category == "Yellow" ? 1 : s.Category == "Blue" ? 2 : 3;
+
+        private int CompareText(string? a, string? b) =>
+            _sortCompareInfo.Compare(a ?? string.Empty, b ?? string.Empty, CompareOptions.IgnoreCase | CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth);
+
+        private int ParseDurationSeconds(string? duration)
+        {
+            if (TimeSpan.TryParse(duration, out var ts)) return (int)ts.TotalSeconds;
+            return 0;
+        }
+
+        private int GetStringGroupRank(char c)
+        {
+            if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) return 0;
+            if ((c >= 'А' && c <= 'я') || c == 'Ё' || c == 'ё') return 1;
+            if (char.IsDigit(c)) return 2;
+            return 3;
+        }
+
+        private int ComparePriorityText(string? left, string? right)
+        {
+            left ??= string.Empty;
+            right ??= string.Empty;
+
+            int minLen = Math.Min(left.Length, right.Length);
+            for (int i = 0; i < minLen; i++)
+            {
+                int rankDiff = GetStringGroupRank(left[i]).CompareTo(GetStringGroupRank(right[i]));
+                if (rankDiff != 0) return rankDiff;
+            }
+
+            int lenDiff = left.Length.CompareTo(right.Length);
+            if (lenDiff != 0) return lenDiff;
+
+            return CompareText(left, right);
+        }
+
+        private sealed class SortKeyComparer : IComparer<object>
+        {
+            private readonly Form1 _form;
+            private readonly SortColumn _column;
+
+            public SortKeyComparer(Form1 form, SortColumn column)
+            {
+                _form = form;
+                _column = column;
+            }
+
+            public int Compare(object? x, object? y)
+            {
+                if (x is int xi && y is int yi) return xi.CompareTo(yi);
+                if (x is long xl && y is long yl) return xl.CompareTo(yl);
+
+                return _column == SortColumn.Name || _column == SortColumn.Bind
+                    ? _form.ComparePriorityText(x?.ToString(), y?.ToString())
+                    : _form.CompareText(x?.ToString(), y?.ToString());
+            }
         }
 
         // --- СОБЫТИЯ МЫШИ ДЛЯ СПИСКА И ПОДСКАЗОК ---
