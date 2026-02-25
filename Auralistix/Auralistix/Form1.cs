@@ -372,6 +372,50 @@ namespace Auralistix
                 button4.Click += button4_Click;
             }
 
+            // Настройки
+            if (menuSettingsBtn != null)
+            {
+                menuSettingsBtn.Click -= MenuSettingsBtn_Click;
+                menuSettingsBtn.Click += MenuSettingsBtn_Click;
+            }
+
+            // Пункты контекстного меню файлов
+            if (воспроизвестиToolStripMenuItem != null)
+            {
+                воспроизвестиToolStripMenuItem.Click -= PlayMenuItem_Click;
+                воспроизвестиToolStripMenuItem.Click += PlayMenuItem_Click;
+            }
+
+            if (переименоватьToolStripMenuItem != null)
+            {
+                переименоватьToolStripMenuItem.Click -= RenameMenuItem_Click;
+                переименоватьToolStripMenuItem.Click += RenameMenuItem_Click;
+            }
+
+            if (удалитьToolStripMenuItem != null)
+            {
+                удалитьToolStripMenuItem.Click -= DeleteMenuItem_Click;
+                удалитьToolStripMenuItem.Click += DeleteMenuItem_Click;
+            }
+
+            if (красныйToolStripMenuItem != null)
+            {
+                красныйToolStripMenuItem.Click -= RedCategoryMenuItem_Click;
+                красныйToolStripMenuItem.Click += RedCategoryMenuItem_Click;
+            }
+
+            if (жёлтыйToolStripMenuItem != null)
+            {
+                жёлтыйToolStripMenuItem.Click -= YellowCategoryMenuItem_Click;
+                жёлтыйToolStripMenuItem.Click += YellowCategoryMenuItem_Click;
+            }
+
+            if (синийToolStripMenuItem != null)
+            {
+                синийToolStripMenuItem.Click -= BlueCategoryMenuItem_Click;
+                синийToolStripMenuItem.Click += BlueCategoryMenuItem_Click;
+            }
+
             // Beep кнопка (hold)
             if (button5 != null)
             {
@@ -787,6 +831,21 @@ namespace Auralistix
         }
 
         private void PlaySelectedSound() { var s = GetSelectedSound(); if (s != null) PlaySoundItem(s); }
+        private void MenuSettingsBtn_Click(object? sender, EventArgs e)
+        {
+            if (settings.IsDisposed) settings = new SettingsForm();
+            if (!settings.Visible) settings.Show(this);
+            settings.BringToFront();
+            settings.Activate();
+        }
+
+        private void PlayMenuItem_Click(object? sender, EventArgs e) => PlaySelectedSound();
+        private void RenameMenuItem_Click(object? sender, EventArgs e) => RenameSelectedSound();
+        private void DeleteMenuItem_Click(object? sender, EventArgs e) => RemoveSelectedSound();
+        private void RedCategoryMenuItem_Click(object? sender, EventArgs e) => SetCategory("Red");
+        private void YellowCategoryMenuItem_Click(object? sender, EventArgs e) => SetCategory("Yellow");
+        private void BlueCategoryMenuItem_Click(object? sender, EventArgs e) => SetCategory("Blue");
+
         private void StopAllSounds() { lock (activeStopTokens) foreach (var cts in activeStopTokens.ToList()) try { cts.Cancel(); } catch { } lock (_soundPlaybacks) _soundPlaybacks.Clear(); }
         private void StopMicInjectedSounds() { lock (activeMicStopTokens) foreach (var cts in activeMicStopTokens.ToList()) try { cts.Cancel(); } catch { } StopBeep(); }
         private void OnStopHotkeyPressed(object? sender, HotkeyEventArgs e) => StopAllSounds();
