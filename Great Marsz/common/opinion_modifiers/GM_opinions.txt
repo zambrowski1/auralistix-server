@@ -1,8 +1,0 @@
-GM_improved_relations = {
-	value = 10
-}
-
-GM_bad_relations = {
-	value = -30
-	trade = yes
-}
