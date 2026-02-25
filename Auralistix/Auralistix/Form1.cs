@@ -81,6 +81,7 @@ namespace Auralistix
         private SortColumn _sortColumn = SortColumn.None;
         private SortDirection _sortDirection = SortDirection.Asc;
         private readonly CompareInfo _sortCompareInfo = new CultureInfo("ru-RU").CompareInfo;
+        private List<SoundItem>? _draggedSounds = null;
 
         // --- ГЛОБАЛЬНЫЕ ХОТКЕИ (API WINDOWS) ---
         [DllImport("user32.dll")]
@@ -239,12 +240,30 @@ namespace Auralistix
             listView1.ColumnClick += ListView1_ColumnClick;
 
             listView1.DragEnter += ListView1_DragEnter;
+            listView1.DragOver += ListView1_DragOver;
             listView1.DragDrop += ListView1_DragDrop;
+            listView1.ItemDrag += ListView1_ItemDrag;
+        }
 
-            listView1.ItemDrag += (s, e) => {
-                var draggedItems = listView1.SelectedItems.Cast<ListViewItem>().ToList();
-                listView1.DoDragDrop(draggedItems, DragDropEffects.Move);
-            };
+
+        private void ListView1_ItemDrag(object? sender, ItemDragEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+
+            _draggedSounds = listView1.SelectedItems
+                .Cast<ListViewItem>()
+                .Select(i => i.Tag as SoundItem)
+                .Where(i => i != null)
+                .Cast<SoundItem>()
+                .ToList();
+
+            if (_draggedSounds.Count == 0)
+            {
+                _draggedSounds = null;
+                return;
+            }
+
+            listView1.DoDragDrop("AURALISTIX_INTERNAL_SOUND_DRAG", DragDropEffects.Move);
         }
 
         private void ListView1_ColumnClick(object? sender, ColumnClickEventArgs e)
@@ -273,7 +292,21 @@ namespace Auralistix
 
         private void ListView1_DragEnter(object? sender, DragEventArgs e)
         {
-            if (e.Data == null) return;
+            ApplyListDragEffect(e);
+        }
+
+        private void ListView1_DragOver(object? sender, DragEventArgs e)
+        {
+            ApplyListDragEffect(e);
+        }
+
+        private void ApplyListDragEffect(DragEventArgs e)
+        {
+            if (e.Data == null)
+            {
+                e.Effect = DragDropEffects.None;
+                return;
+            }
 
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
@@ -281,8 +314,8 @@ namespace Auralistix
                 return;
             }
 
-            if (e.Data.GetDataPresent(typeof(List<ListViewItem>)))
-                e.Effect = (GetSelectedBank() != null && string.IsNullOrWhiteSpace(txtSearch.Text)) ? DragDropEffects.Move : DragDropEffects.None;
+            bool canReorder = GetSelectedBank() != null && string.IsNullOrWhiteSpace(txtSearch.Text) && _draggedSounds != null && _draggedSounds.Count > 0;
+            e.Effect = canReorder ? DragDropEffects.Move : DragDropEffects.None;
         }
 
         private void ListView1_DragDrop(object? sender, DragEventArgs e)
@@ -301,19 +334,23 @@ namespace Auralistix
                 return;
             }
 
-            if (!e.Data.GetDataPresent(typeof(List<ListViewItem>)) || e.Data.GetData(typeof(List<ListViewItem>)) is not List<ListViewItem> draggedItems)
-                return;
+            var sounds = _draggedSounds;
+            _draggedSounds = null;
+            if (sounds == null || sounds.Count == 0) return;
 
             var bank = GetSelectedBank();
             if (bank == null || !string.IsNullOrWhiteSpace(txtSearch.Text)) return;
 
+            var primaryCategory = sounds[0].Category;
+            if (sounds.Any(s => s.Category != primaryCategory)) return;
+
             var clientPoint = listView1.PointToClient(new Point(e.X, e.Y));
             var targetItem = listView1.GetItemAt(clientPoint.X, clientPoint.Y);
-            int insertAt = targetItem?.Tag is SoundItem targetSound ? bank.Sounds.IndexOf(targetSound) : bank.Sounds.Count;
-            if (insertAt < 0) insertAt = bank.Sounds.Count;
 
-            var sounds = draggedItems.Select(i => i.Tag as SoundItem).Where(i => i != null).Cast<SoundItem>().ToList();
-            if (sounds.Count == 0) return;
+            if (targetItem?.Tag is SoundItem targetSound && targetSound.Category != primaryCategory)
+                return;
+
+            int insertAt = GetCategoryInsertIndex(bank, primaryCategory, targetItem?.Tag as SoundItem);
 
             var firstDraggedIndex = bank.Sounds.IndexOf(sounds[0]);
             bool movingDown = firstDraggedIndex >= 0 && firstDraggedIndex < insertAt;
@@ -332,6 +369,30 @@ namespace Auralistix
 
             RefreshListView();
             AutoSaveProfile();
+        }
+
+        private int GetCategoryInsertIndex(SoundBank bank, string category, SoundItem? targetSound)
+        {
+            var categoryIndexes = bank.Sounds
+                .Select((sound, index) => new { sound, index })
+                .Where(x => x.sound.Category == category)
+                .Select(x => x.index)
+                .ToList();
+
+            if (categoryIndexes.Count == 0)
+                return bank.Sounds.Count;
+
+            int minIndex = categoryIndexes.First();
+            int maxIndex = categoryIndexes.Last();
+
+            if (targetSound == null)
+                return maxIndex + 1;
+
+            int targetIndex = bank.Sounds.IndexOf(targetSound);
+            if (targetIndex < 0)
+                return maxIndex + 1;
+
+            return Math.Clamp(targetIndex, minIndex, maxIndex + 1);
         }
 
         private bool IsMicRoutingNeeded() => (s_cbPassthrough?.Checked ?? false) || (s_cbMicListen?.Checked ?? false);
@@ -793,30 +854,32 @@ namespace Auralistix
 
         private IEnumerable<SoundItem> SortSoundsForDisplay(IEnumerable<SoundItem> sounds)
         {
-            IOrderedEnumerable<SoundItem> ordered;
-
             if (_sortColumn == SortColumn.None)
             {
-                ordered = sounds.OrderBy(CategoryRank)
-                               .ThenBy(s => s.Name, Comparer<string>.Create(CompareText));
+                return sounds.OrderBy(CategoryRank)
+                            .ThenBy(s => s.Name, Comparer<string>.Create(CompareText));
             }
-            else
+
+            return _sortColumn switch
             {
-                Func<SoundItem, object> keySelector = _sortColumn switch
-                {
-                    SortColumn.Number => s => GetSelectedBank()?.Sounds.IndexOf(s) ?? int.MaxValue,
-                    SortColumn.Name => s => s.Name,
-                    SortColumn.Duration => s => ParseDurationSeconds(s.Duration),
-                    SortColumn.Bind => s => s.BindKey,
-                    _ => s => s.Name
-                };
+                SortColumn.Number => _sortDirection == SortDirection.Asc
+                    ? sounds.OrderBy(CategoryRank).ThenBy(s => GetSelectedBank()?.Sounds.IndexOf(s) ?? int.MaxValue)
+                    : sounds.OrderBy(CategoryRank).ThenByDescending(s => GetSelectedBank()?.Sounds.IndexOf(s) ?? int.MaxValue),
 
-                ordered = _sortDirection == SortDirection.Asc
-                    ? sounds.OrderBy(CategoryRank).ThenBy(keySelector, new SortKeyComparer(this, _sortColumn))
-                    : sounds.OrderBy(CategoryRank).ThenByDescending(keySelector, new SortKeyComparer(this, _sortColumn));
-            }
+                SortColumn.Name => _sortDirection == SortDirection.Asc
+                    ? sounds.OrderBy(CategoryRank).ThenBy(s => s.Name, Comparer<string>.Create(ComparePriorityText))
+                    : sounds.OrderBy(CategoryRank).ThenByDescending(s => s.Name, Comparer<string>.Create(ComparePriorityText)),
 
-            return ordered;
+                SortColumn.Duration => _sortDirection == SortDirection.Asc
+                    ? sounds.OrderBy(CategoryRank).ThenBy(s => ParseDurationSeconds(s.Duration))
+                    : sounds.OrderBy(CategoryRank).ThenByDescending(s => ParseDurationSeconds(s.Duration)),
+
+                SortColumn.Bind => _sortDirection == SortDirection.Asc
+                    ? sounds.OrderBy(CategoryRank).ThenBy(s => s.BindKey, Comparer<string>.Create(ComparePriorityText))
+                    : sounds.OrderBy(CategoryRank).ThenByDescending(s => s.BindKey, Comparer<string>.Create(ComparePriorityText)),
+
+                _ => sounds.OrderBy(CategoryRank).ThenBy(s => s.Name, Comparer<string>.Create(CompareText))
+            };
         }
 
         private int CategoryRank(SoundItem s) => s.Category == "Red" ? 0 : s.Category == "Yellow" ? 1 : s.Category == "Blue" ? 2 : 3;
@@ -856,27 +919,6 @@ namespace Auralistix
             return CompareText(left, right);
         }
 
-        private sealed class SortKeyComparer : IComparer<object>
-        {
-            private readonly Form1 _form;
-            private readonly SortColumn _column;
-
-            public SortKeyComparer(Form1 form, SortColumn column)
-            {
-                _form = form;
-                _column = column;
-            }
-
-            public int Compare(object? x, object? y)
-            {
-                if (x is int xi && y is int yi) return xi.CompareTo(yi);
-                if (x is long xl && y is long yl) return xl.CompareTo(yl);
-
-                return _column == SortColumn.Name || _column == SortColumn.Bind
-                    ? _form.ComparePriorityText(x?.ToString(), y?.ToString())
-                    : _form.CompareText(x?.ToString(), y?.ToString());
-            }
-        }
 
         // --- СОБЫТИЯ МЫШИ ДЛЯ СПИСКА И ПОДСКАЗОК ---
         private void ListView1_MouseMove(object? sender, MouseEventArgs e)
