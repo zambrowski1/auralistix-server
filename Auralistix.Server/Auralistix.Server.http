@@ -1,0 +1,6 @@
+@Auralistix.Server_HostAddress = http://localhost:5031
+
+GET {{Auralistix.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
