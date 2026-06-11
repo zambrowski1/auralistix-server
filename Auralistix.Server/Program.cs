@@ -1124,40 +1124,33 @@ static async Task<CommunityUserDto> BuildUserDtoAsync(
     string baseUrl,
     CancellationToken cancellationToken)
 {
-    var approvedUploadCountTask = db.Sounds
+    var approvedUploadCount = await db.Sounds
         .AsNoTracking()
         .CountAsync(sound => sound.UploadedByUserId == user.Id && sound.ModerationStatus == SoundModerationStatus.Approved, cancellationToken);
-    var totalDownloadsTask = db.Sounds
+    var totalDownloads = await db.Sounds
         .AsNoTracking()
         .Where(sound => sound.UploadedByUserId == user.Id && sound.ModerationStatus == SoundModerationStatus.Approved)
         .SumAsync(sound => (int?)sound.DownloadCount, cancellationToken);
-    var followerCountTask = db.Follows
+    var followerCount = await db.Follows
         .AsNoTracking()
         .CountAsync(follow => follow.FollowedUserId == user.Id, cancellationToken);
-    var followingCountTask = db.Follows
+    var followingCount = await db.Follows
         .AsNoTracking()
         .CountAsync(follow => follow.FollowerUserId == user.Id, cancellationToken);
-    var collectionCountTask = db.Collections
+    var collectionCount = await db.Collections
         .AsNoTracking()
         .CountAsync(collection => collection.OwnerUserId == user.Id, cancellationToken);
-
-    await Task.WhenAll(
-        approvedUploadCountTask,
-        totalDownloadsTask,
-        followerCountTask,
-        followingCountTask,
-        collectionCountTask);
 
     var achievements = await BuildAchievementsAsync(db, user.Id, cancellationToken);
 
     return user.ToDto(
         baseUrl,
-        followerCountTask.Result,
-        followingCountTask.Result,
-        collectionCountTask.Result,
+        followerCount,
+        followingCount,
+        collectionCount,
         achievements.Count,
-        approvedUploadCountTask.Result,
-        totalDownloadsTask.Result ?? 0);
+        approvedUploadCount,
+        totalDownloads ?? 0);
 }
 
 static async Task<PublicProfileDto> BuildPublicProfileDtoAsync(
@@ -1168,7 +1161,7 @@ static async Task<PublicProfileDto> BuildPublicProfileDtoAsync(
     bool isModerator,
     CancellationToken cancellationToken)
 {
-    var uploadsTask = db.Sounds
+    var uploads = await db.Sounds
         .AsNoTracking()
         .Include(sound => sound.Category)
         .Include(sound => sound.UploadedByUser)
@@ -1177,46 +1170,38 @@ static async Task<PublicProfileDto> BuildPublicProfileDtoAsync(
         .ThenByDescending(sound => sound.CreatedAtUtc)
         .Take(24)
         .ToListAsync(cancellationToken);
-    var approvedUploadCountTask = db.Sounds
+    var approvedUploadCount = await db.Sounds
         .AsNoTracking()
         .CountAsync(sound => sound.UploadedByUserId == user.Id && sound.ModerationStatus == SoundModerationStatus.Approved, cancellationToken);
-    var totalDownloadsTask = db.Sounds
+    var totalDownloads = await db.Sounds
         .AsNoTracking()
         .Where(sound => sound.UploadedByUserId == user.Id && sound.ModerationStatus == SoundModerationStatus.Approved)
         .SumAsync(sound => (int?)sound.DownloadCount, cancellationToken);
-    var followerCountTask = db.Follows
+    var followerCount = await db.Follows
         .AsNoTracking()
         .CountAsync(follow => follow.FollowedUserId == user.Id, cancellationToken);
-    var followingCountTask = db.Follows
+    var followingCount = await db.Follows
         .AsNoTracking()
         .CountAsync(follow => follow.FollowerUserId == user.Id, cancellationToken);
-    var isFollowedTask = currentUserId.HasValue
-        ? db.Follows
+    var isFollowed = currentUserId.HasValue
+        ? await db.Follows
             .AsNoTracking()
             .AnyAsync(follow => follow.FollowerUserId == currentUserId.Value && follow.FollowedUserId == user.Id, cancellationToken)
-        : Task.FromResult(false);
-
-    await Task.WhenAll(
-        uploadsTask,
-        approvedUploadCountTask,
-        totalDownloadsTask,
-        followerCountTask,
-        followingCountTask,
-        isFollowedTask);
+        : false;
 
     var achievements = await BuildAchievementsAsync(db, user.Id, cancellationToken);
     var collections = await LoadCollectionsAsync(db, user.Id, baseUrl, currentUserId, isModerator, 8, cancellationToken);
 
     return user.ToPublicProfileDto(
         baseUrl,
-        followerCountTask.Result,
-        followingCountTask.Result,
-        approvedUploadCountTask.Result,
-        totalDownloadsTask.Result ?? 0,
-        isFollowedTask.Result,
+        followerCount,
+        followingCount,
+        approvedUploadCount,
+        totalDownloads ?? 0,
+        isFollowed,
         achievements,
         collections,
-        uploadsTask.Result.Select(sound => sound.ToDto(baseUrl, currentUserId, isModerator)).ToList());
+        uploads.Select(sound => sound.ToDto(baseUrl, currentUserId, isModerator)).ToList());
 }
 
 static async Task<FollowStateDto> BuildFollowStateAsync(
@@ -1225,18 +1210,17 @@ static async Task<FollowStateDto> BuildFollowStateAsync(
     Guid viewedUserId,
     CancellationToken cancellationToken)
 {
-    var isFollowingTask = db.Follows
+    var isFollowing = await db.Follows
         .AsNoTracking()
         .AnyAsync(follow => follow.FollowerUserId == currentUserId && follow.FollowedUserId == viewedUserId, cancellationToken);
-    var followerCountTask = db.Follows
+    var followerCount = await db.Follows
         .AsNoTracking()
         .CountAsync(follow => follow.FollowedUserId == viewedUserId, cancellationToken);
-    var followingCountTask = db.Follows
+    var followingCount = await db.Follows
         .AsNoTracking()
         .CountAsync(follow => follow.FollowerUserId == viewedUserId, cancellationToken);
 
-    await Task.WhenAll(isFollowingTask, followerCountTask, followingCountTask);
-    return new FollowStateDto(isFollowingTask.Result, followerCountTask.Result, followingCountTask.Result);
+    return new FollowStateDto(isFollowing, followerCount, followingCount);
 }
 
 static async Task<List<CommunityCollectionDto>> LoadCollectionsAsync(
@@ -1278,23 +1262,23 @@ static async Task<List<CommunityAchievementDto>> BuildAchievementsAsync(
     Guid userId,
     CancellationToken cancellationToken)
 {
-    var approvedUploadCountTask = db.Sounds
+    var approvedUploadCount = await db.Sounds
         .AsNoTracking()
         .CountAsync(sound => sound.UploadedByUserId == userId && sound.ModerationStatus == SoundModerationStatus.Approved, cancellationToken);
-    var totalDownloadsTask = db.Sounds
+    var totalDownloads = await db.Sounds
         .AsNoTracking()
         .Where(sound => sound.UploadedByUserId == userId && sound.ModerationStatus == SoundModerationStatus.Approved)
         .SumAsync(sound => (int?)sound.DownloadCount, cancellationToken);
-    var collectionCountTask = db.Collections
+    var collectionCount = await db.Collections
         .AsNoTracking()
         .CountAsync(collection => collection.OwnerUserId == userId, cancellationToken);
-    var moderationHistoryTask = db.Sounds
+    var moderationHistory = await db.Sounds
         .AsNoTracking()
         .Where(sound => sound.UploadedByUserId == userId)
         .OrderBy(sound => sound.CreatedAtUtc)
         .Select(sound => sound.ModerationStatus)
         .ToListAsync(cancellationToken);
-    var weeklyTopUsersTask = db.SoundDownloads
+    var weeklyTopUsers = await db.SoundDownloads
         .AsNoTracking()
         .Where(download => download.DownloadedAtUtc >= DateTime.UtcNow.AddDays(-7))
         .Join(
@@ -1308,17 +1292,10 @@ static async Task<List<CommunityAchievementDto>> BuildAchievementsAsync(
         .Take(3)
         .ToListAsync(cancellationToken);
 
-    await Task.WhenAll(
-        approvedUploadCountTask,
-        totalDownloadsTask,
-        collectionCountTask,
-        moderationHistoryTask,
-        weeklyTopUsersTask);
-
     var achievements = new List<CommunityAchievementDto>();
-    var maxApprovedStreak = GetMaxApprovedStreak(moderationHistoryTask.Result);
+    var maxApprovedStreak = GetMaxApprovedStreak(moderationHistory);
 
-    if ((totalDownloadsTask.Result ?? 0) >= 100)
+    if ((totalDownloads ?? 0) >= 100)
     {
         achievements.Add(new CommunityAchievementDto(
             "downloads_100",
@@ -1327,7 +1304,7 @@ static async Task<List<CommunityAchievementDto>> BuildAchievementsAsync(
             "#F59E0B"));
     }
 
-    if (approvedUploadCountTask.Result >= 5)
+    if (approvedUploadCount >= 5)
     {
         achievements.Add(new CommunityAchievementDto(
             "approved_5",
@@ -1345,7 +1322,7 @@ static async Task<List<CommunityAchievementDto>> BuildAchievementsAsync(
             "#8B5CF6"));
     }
 
-    if (weeklyTopUsersTask.Result.Any(item => item.UserId == userId))
+    if (weeklyTopUsers.Any(item => item.UserId == userId))
     {
         achievements.Add(new CommunityAchievementDto(
             "top_week",
@@ -1354,7 +1331,7 @@ static async Task<List<CommunityAchievementDto>> BuildAchievementsAsync(
             "#EC4899"));
     }
 
-    if (collectionCountTask.Result >= 1)
+    if (collectionCount >= 1)
     {
         achievements.Add(new CommunityAchievementDto(
             "pack_curator",
