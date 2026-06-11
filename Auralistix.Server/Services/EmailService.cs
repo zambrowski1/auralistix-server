@@ -1,6 +1,9 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Mail;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Auralistix.Server.Options;
 using Microsoft.Extensions.Options;
 
@@ -22,6 +25,16 @@ public sealed class EmailSender(
     IOptions<SmtpOptions> smtpOptions,
     IOptions<CommunityOptions> communityOptions) : IEmailSender
 {
+    private static readonly HttpClient ResendHttpClient = new()
+    {
+        Timeout = TimeSpan.FromSeconds(15)
+    };
+
+    private static readonly JsonSerializerOptions ResendJsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
     private readonly SmtpOptions _smtpOptions = smtpOptions.Value;
     private readonly CommunityOptions _communityOptions = communityOptions.Value;
     private readonly string _contentRootPath = environment.ContentRootPath;
@@ -34,6 +47,9 @@ public sealed class EmailSender(
     {
         if (string.IsNullOrWhiteSpace(_smtpOptions.Host))
             return await WritePreviewEmailAsync(recipientEmail, recipientName, confirmationUrl, cancellationToken);
+
+        if (IsResendConfigured())
+            return await SendResendEmailAsync(recipientEmail, recipientName, confirmationUrl, cancellationToken);
 
         using var message = new MailMessage
         {
@@ -63,6 +79,49 @@ public sealed class EmailSender(
 
         await client.SendMailAsync(message, cancellationToken);
         return new EmailDispatchInfo("smtp", null);
+    }
+
+    private bool IsResendConfigured()
+    {
+        return _smtpOptions.Host.Contains("resend.com", StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrWhiteSpace(_smtpOptions.Password);
+    }
+
+    private async Task<EmailDispatchInfo> SendResendEmailAsync(
+        string recipientEmail,
+        string recipientName,
+        string confirmationUrl,
+        CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _smtpOptions.Password);
+
+        var replyTo = string.IsNullOrWhiteSpace(_smtpOptions.ReplyToAddress)
+            ? null
+            : new MailAddress(_smtpOptions.ReplyToAddress, _smtpOptions.FromName).ToString();
+
+        var payload = new ResendEmailRequest
+        {
+            From = new MailAddress(_smtpOptions.FromAddress, _smtpOptions.FromName).ToString(),
+            To = [recipientEmail],
+            Subject = "Auralistix Community: confirm your email",
+            Html = BuildHtmlBody(recipientName, confirmationUrl),
+            ReplyTo = replyTo
+        };
+
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(payload, ResendJsonOptions),
+            Encoding.UTF8,
+            "application/json");
+
+        using var response = await ResendHttpClient.SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new InvalidOperationException($"Resend email API failed with status {(int)response.StatusCode}: {body}");
+        }
+
+        return new EmailDispatchInfo("resend-http", null);
     }
 
     private async Task<EmailDispatchInfo> WritePreviewEmailAsync(
@@ -112,5 +171,23 @@ public sealed class EmailSender(
             </body>
             </html>
             """;
+    }
+
+    private sealed class ResendEmailRequest
+    {
+        [JsonPropertyName("from")]
+        public string From { get; init; } = string.Empty;
+
+        [JsonPropertyName("to")]
+        public string[] To { get; init; } = [];
+
+        [JsonPropertyName("subject")]
+        public string Subject { get; init; } = string.Empty;
+
+        [JsonPropertyName("html")]
+        public string Html { get; init; } = string.Empty;
+
+        [JsonPropertyName("reply_to")]
+        public string? ReplyTo { get; init; }
     }
 }
